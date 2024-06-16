@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Form
+from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_login import LoginManager
@@ -64,6 +65,7 @@ def login(id:Annotated[str,Form()],
     
     return {'access_token':access_token}
     return {'access_token': access_token}
+
 
 # 정적 파일 서빙
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
