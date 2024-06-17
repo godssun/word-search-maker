@@ -18,7 +18,7 @@ const handleSubmit = async (event) => {
     if (data.access_token) {
       localStorage.setItem("token", data.access_token);
       document.getElementById("result").innerText = "Login successful!";
-      window.location.pathname = "/";
+      window.location.pathname = "/static/index.html";
     } else {
       document.getElementById("result").innerText = "Login failed!";
     }

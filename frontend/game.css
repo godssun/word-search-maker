@@ -1,0 +1,114 @@
+/* game.css */
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1,
+h2 {
+  text-align: center;
+  color: #333;
+}
+
+#game-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+#time {
+  margin-bottom: 10px;
+  font-size: 18px;
+  color: #333;
+}
+
+#leaderboard,
+#word-list {
+  background-color: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  width: 100%;
+  max-width: 300px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(10, 30px);
+  gap: 2px;
+  margin: 20px 0;
+}
+
+#grid div {
+  width: 30px;
+  height: 30px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+#grid div.correct {
+  background-color: #4caf50; /* Green for correct words */
+  color: white;
+}
+
+#grid div.incorrect {
+  background-color: #f44336; /* Red for incorrect words */
+  color: white;
+}
+
+#grid div.selected {
+  background-color: #2196f3; /* Blue for selected cells */
+  color: white;
+}
+
+li.found {
+  text-decoration: line-through;
+  color: #4caf50;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  #grid {
+    grid-template-columns: repeat(5, 30px);
+  }
+
+  h1,
+  h2 {
+    font-size: 18px;
+  }
+}

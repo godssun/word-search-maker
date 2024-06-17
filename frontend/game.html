@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Word Search Game</title>
+    <link rel="stylesheet" href="/static/game.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="game-title">Title</h1>
+      <p id="game-description">Description</p>
+      <div id="game-info">
+        <div id="time">Time elapsed: 0s</div>
+        <div id="leaderboard">
+          <h2>Leaderboard</h2>
+          <ul id="scores"></ul>
+        </div>
+      </div>
+      <div id="grid"></div>
+      <div id="word-list">
+        <h2>Find these words:</h2>
+        <ul id="words"></ul>
+      </div>
+      <div id="user-input">
+        <label for="username">Enter your name:</label>
+        <input type="text" id="username" required />
+        <button id="start-button">Start</button>
+      </div>
+    </div>
+    <script src="/static/script.js"></script>
+  </body>
+</html>
