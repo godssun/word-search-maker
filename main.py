@@ -193,7 +193,6 @@ def query_user(data):
                        """).fetchone()
     return user
 
-# 회원가입 엔드포인트
 @app.post('/signup')
 def signup(id: Annotated[str, Form()],
            password: Annotated[str, Form()],
@@ -211,7 +210,6 @@ def signup(id: Annotated[str, Form()],
         logging.error(f"Error in /signup: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-# 로그인 엔드포인트
 @app.post('/login')
 def login(id: Annotated[str, Form()],
           password: Annotated[str, Form()]):
@@ -231,15 +229,13 @@ def login(id: Annotated[str, Form()],
             }
         })
 
-        response = RedirectResponse(url='/index.html', status_code=302)
-        response.set_cookie(key="access_token", value=access_token, httponly=True)
-        return response
+        return {'access_token': access_token}
     except Exception as e:
         logging.error(f"Error in /login: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # 정적 파일 서빙
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+app.mount("/static", StaticFiles(directory="frontend", html=True), name="frontend")
 
 # 로그인 페이지를 루트로 서빙
 @app.get("/", response_class=HTMLResponse)
