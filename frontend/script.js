@@ -99,21 +99,74 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       let startTime = Date.now();
-      setInterval(() => {
+      let timerInterval = setInterval(() => {
         const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
         document.getElementById("time").textContent = `Time elapsed: ${elapsedTime}s`;
       }, 1000);
 
-      const scores = document.getElementById("scores");
-      scores.innerHTML = "";
-      if (Array.isArray(data.scores)) {
-        data.scores.forEach((score) => {
+      function checkWord(selectedWord, words) {
+        if (words.includes(selectedWord)) {
+          selectedCells.forEach((cell) => cell.classList.add("correct"));
+          words.splice(words.indexOf(selectedWord), 1);
+          updateWordList(words);
+          if (words.length === 0) {
+            clearInterval(timerInterval);
+            const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+            const points = calculatePoints(elapsedTime);
+            submitScore(gameId, username, points, elapsedTime);
+          }
+        } else {
+          selectedCells.forEach((cell) => cell.classList.add("incorrect"));
+          setTimeout(() => {
+            selectedCells.forEach((cell) => cell.classList.remove("incorrect"));
+          }, 1000);
+        }
+      }
+
+      function updateWordList(words) {
+        const wordList = document.getElementById("words");
+        wordList.childNodes.forEach((wordItem) => {
+          if (!words.includes(wordItem.textContent)) {
+            wordItem.classList.add("found");
+          }
+        });
+      }
+
+      function calculatePoints(elapsedTime) {
+        const basePoints = 1000;
+        return basePoints - elapsedTime;
+      }
+
+      async function submitScore(gameId, username, points, timeElapsed) {
+        try {
+          const response = await fetch("/score", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ gameId, username, points, timeElapsed }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            alert("Congratulations! You've found all the words.");
+            updateLeaderboard(data.scores);
+          } else {
+            alert("Failed to submit score.");
+          }
+        } catch (error) {
+          console.error("Error submitting score:", error);
+        }
+      }
+
+      function updateLeaderboard(scores) {
+        const scoresElement = document.getElementById("scores");
+        scoresElement.innerHTML = "";
+        scores.forEach((score, index) => {
           const scoreItem = document.createElement("li");
           scoreItem.textContent = `${score.username}: ${score.points}`;
-          if (scores.children.length < 3) {
+          if (index < 3) {
             scoreItem.style.fontWeight = "bold";
           }
-          scores.appendChild(scoreItem);
+          scoresElement.appendChild(scoreItem);
         });
       }
 
@@ -139,28 +192,6 @@ document.addEventListener("DOMContentLoaded", function () {
         checkWord(selectedWord, data.words);
         selectedCells.forEach((cell) => cell.classList.remove("selected"));
         selectedCells = [];
-      }
-
-      function checkWord(selectedWord, words) {
-        if (words.includes(selectedWord)) {
-          selectedCells.forEach((cell) => cell.classList.add("correct"));
-          words.splice(words.indexOf(selectedWord), 1);
-          updateWordList(words);
-        } else {
-          selectedCells.forEach((cell) => cell.classList.add("incorrect"));
-          setTimeout(() => {
-            selectedCells.forEach((cell) => cell.classList.remove("incorrect"));
-          }, 1000);
-        }
-      }
-
-      function updateWordList(words) {
-        const wordList = document.getElementById("words");
-        wordList.childNodes.forEach((wordItem) => {
-          if (!words.includes(wordItem.textContent)) {
-            wordItem.classList.add("found");
-          }
-        });
       }
     } catch (error) {
       console.error("Error fetching game data:", error);

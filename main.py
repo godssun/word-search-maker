@@ -1,7 +1,7 @@
 import logging
 import sqlite3
 from fastapi import FastAPI, Form, Request, HTTPException, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_login import LoginManager
 from fastapi_login.exceptions import InvalidCredentialsException
@@ -12,7 +12,7 @@ import random
 
 logging.basicConfig(level=logging.INFO)
 
-# 데이터베이스 연결
+# 데이터베이스 연결 함수
 def create_connection():
     try:
         conn = sqlite3.connect('wsm.db', check_same_thread=False)
@@ -24,7 +24,7 @@ def create_connection():
 conn = create_connection()
 cur = conn.cursor()
 
-# 데이터베이스 초기화
+# 데이터베이스 초기화 함수
 def initialize_database():
     try:
         with conn:
@@ -76,6 +76,7 @@ app.add_middleware(
 SECRET = "super-coding"
 manager = LoginManager(SECRET, '/login')
 
+# 워드 서치 그리드 생성 함수
 def generate_word_search(words):
     size = 10
     grid = [[' ' for _ in range(size)] for _ in range(size)]
@@ -106,6 +107,7 @@ def generate_word_search(words):
     
     return grid
 
+# 워드 서치 게임을 생성하는 엔드포인트
 @app.post("/generate")
 async def generate(request: Request):
     try:
@@ -132,6 +134,7 @@ async def generate(request: Request):
         logging.error(f"Error in /generate: {e}, Data received: {data}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# 특정 워드 서치 게임 정보를 가져오는 엔드포인트
 @app.get("/game/{game_id}")
 async def get_game(game_id: int):
     try:
@@ -148,6 +151,7 @@ async def get_game(game_id: int):
         logging.error(f"Error in /game/{game_id}: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+# 점수를 제출하는 엔드포인트
 @app.post("/score")
 async def post_score(request: Request):
     try:
@@ -164,11 +168,19 @@ async def post_score(request: Request):
                 'INSERT INTO scores (game_id, username, points, time_elapsed) VALUES (?, ?, ?, ?)',
                 (game_id, username, points, time_elapsed)
             )
-        return {"status": "Score submitted"}
+
+            cursor.execute(
+                'SELECT username, points FROM scores WHERE game_id = ? ORDER BY points DESC, time_elapsed ASC LIMIT 10',
+                (game_id,)
+            )
+            scores = cursor.fetchall()
+
+        return {"status": "Score submitted", "scores": [{"username": row[0], "points": row[1]} for row in scores]}
     except Exception as e:
         logging.error(f"Error in /score: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+# 사용자를 조회하는 함수
 @manager.user_loader()
 def query_user(data):
     WHERE_STATEMENT = f'id="{data}"'
@@ -181,6 +193,7 @@ def query_user(data):
                        """).fetchone()
     return user
 
+# 회원가입 엔드포인트
 @app.post('/signup')
 def signup(id: Annotated[str, Form()],
            password: Annotated[str, Form()],
@@ -198,6 +211,7 @@ def signup(id: Annotated[str, Form()],
         logging.error(f"Error in /signup: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+# 로그인 엔드포인트
 @app.post('/login')
 def login(id: Annotated[str, Form()],
           password: Annotated[str, Form()]):
@@ -217,10 +231,18 @@ def login(id: Annotated[str, Form()],
             }
         })
 
-        return {'access_token': access_token}
+        response = RedirectResponse(url='/index.html', status_code=302)
+        response.set_cookie(key="access_token", value=access_token, httponly=True)
+        return response
     except Exception as e:
         logging.error(f"Error in /login: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # 정적 파일 서빙
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+
+# 로그인 페이지를 루트로 서빙
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    with open("frontend/login.html") as f:
+        return HTMLResponse(content=f.read(), status_code=200)
