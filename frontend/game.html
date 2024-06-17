@@ -3,7 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Word Search Game</title>
+    <link rel="stylesheet" href="game.css" />
   </head>
-  <body></body>
+  <body>
+    <div class="container">
+      <h1 id="game-title">Title</h1>
+      <p id="game-description">Description</p>
+      <div id="game-info">
+        <div id="time">Time elapsed: 0s</div>
+        <div id="leaderboard">
+          <h2>Leaderboard</h2>
+          <ul id="scores"></ul>
+        </div>
+      </div>
+      <div id="grid"></div>
+      <div id="word-list">
+        <h2>Find these words:</h2>
+        <ul id="words"></ul>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
 </html>
